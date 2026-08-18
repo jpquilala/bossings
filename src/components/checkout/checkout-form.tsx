@@ -10,7 +10,6 @@ import {
   Loader2Icon,
   ShoppingBagIcon,
   StoreIcon,
-  UtensilsIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,7 +32,9 @@ const ORDER_TYPES: {
   hint: string;
   icon: React.ElementType;
 }[] = [
-  { value: "DINE_IN", label: "Dine In", hint: "Kain dito sa stall", icon: UtensilsIcon },
+  // DINE_IN is deliberately absent: a customer already at the stall orders
+  // over the counter, so routing them through checkout adds nothing. The
+  // enum value survives in the database so older orders still render.
   { value: "TAKE_OUT", label: "Take Out", hint: "Pick up and go", icon: ShoppingBagIcon },
   {
     value: "ADVANCE_ORDER",

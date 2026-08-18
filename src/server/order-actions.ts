@@ -21,7 +21,11 @@ const checkoutSchema = z
       .string()
       .trim()
       .regex(PHONE_REGEX, "Enter a valid mobile number, e.g. 09171234567"),
-    orderType: z.enum(["DINE_IN", "TAKE_OUT", "ADVANCE_ORDER", "DELIVERY"]),
+    // DINE_IN is intentionally not accepted: it was retired from checkout,
+    // and a Server Action is a public endpoint, so the UI change alone would
+    // not stop a crafted request. The enum value remains in the database for
+    // historical orders.
+    orderType: z.enum(["TAKE_OUT", "ADVANCE_ORDER", "DELIVERY"]),
     paymentMethod: z.enum(["CASH", "GCASH"]),
     address: z.string().trim().max(300).optional().nullable(),
     scheduledFor: z.string().datetime().optional().nullable(),
