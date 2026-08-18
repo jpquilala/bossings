@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { UserAvatar } from "@/components/auth/user-avatar";
+import { PROVIDER_LABEL, ProviderIcon } from "@/components/auth/provider-badge";
 import { getSessionProfile } from "@/server/profile";
 import { getOrdersForUser } from "@/server/orders";
 import { signOut } from "@/server/auth-actions";
@@ -33,12 +35,20 @@ export default async function AccountOrdersPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl">My orders</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Kumusta{profile.fullName ? `, ${profile.fullName.split(" ")[0]}` : ""}! Here&apos;s
-            everything you&apos;ve ordered.
-          </p>
+        <div className="flex items-center gap-3">
+          <UserAvatar
+            fullName={profile.fullName}
+            email={profile.email}
+            avatarUrl={profile.avatarUrl}
+            size={52}
+          />
+          <div className="min-w-0">
+            <h1 className="text-3xl">My orders</h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Kumusta{profile.fullName ? `, ${profile.fullName.split(" ")[0]}` : ""}! Here&apos;s
+              everything you&apos;ve ordered.
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -57,6 +67,45 @@ export default async function AccountOrdersPage() {
           </form>
         </div>
       </header>
+
+      {/* Account summary — confirms which identity the customer is signed in
+          with, which matters when someone has both a Facebook and a Google
+          account against different email addresses. */}
+      <Card className="mt-6">
+        <CardContent className="flex flex-wrap items-center gap-x-6 gap-y-3 py-4">
+          <div className="min-w-0">
+            <p className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+              Name
+            </p>
+            <p className="truncate font-semibold">{profile.fullName ?? "Not set"}</p>
+          </div>
+          <div className="min-w-0">
+            <p className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+              Email
+            </p>
+            <p className="truncate font-semibold">{profile.email ?? "Not set"}</p>
+          </div>
+          {profile.phone && (
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+                Phone
+              </p>
+              <p className="truncate font-semibold">{profile.phone}</p>
+            </div>
+          )}
+          {profile.provider && (
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+                Signed in with
+              </p>
+              <p className="flex items-center gap-1.5 font-semibold">
+                <ProviderIcon provider={profile.provider} />
+                {PROVIDER_LABEL[profile.provider] ?? profile.provider}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {orders.length === 0 ? (
         <Card className="mt-6">

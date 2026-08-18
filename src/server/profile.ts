@@ -10,6 +10,8 @@ export type SessionProfile = {
   avatarUrl: string | null;
   role: Role;
   email: string | null;
+  /** How the user signed in: "facebook", "google", "email". */
+  provider: string | null;
 };
 
 /**
@@ -49,6 +51,9 @@ export async function getSessionProfile(): Promise<SessionProfile | null> {
     avatarUrl: profile.avatarUrl,
     role: profile.role,
     email: user.email ?? null,
+    // app_metadata is provider-controlled and cannot be edited by the user,
+    // unlike user_metadata.
+    provider: (user.app_metadata?.provider as string | undefined) ?? null,
   };
 }
 

@@ -85,7 +85,13 @@ export default async function RootLayout({
 
         <CartProvider>
           <div className="flex min-h-dvh flex-col">
-            <SiteHeader isSignedIn={Boolean(profile)} isStaff={isStaff(profile?.role)} />
+            <SiteHeader
+              isSignedIn={Boolean(profile)}
+              isStaff={isStaff(profile?.role)}
+              fullName={profile?.fullName ?? null}
+              email={profile?.email ?? null}
+              avatarUrl={profile?.avatarUrl ?? null}
+            />
             <main id="main" className="flex-1">
               {children}
             </main>

@@ -26,6 +26,7 @@ import {
 import { Logo } from "@/components/brand/logo";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { useCart } from "@/components/cart/cart-provider";
+import { UserAvatar } from "@/components/auth/user-avatar";
 import { cn } from "@/lib/utils";
 
 type NavLink = { href: string; label: string; icon: React.ElementType };
@@ -55,9 +56,16 @@ function navLinks(isSignedIn: boolean): NavLink[] {
 export function SiteHeader({
   isSignedIn,
   isStaff,
+  fullName = null,
+  email = null,
+  avatarUrl = null,
 }: {
   isSignedIn: boolean;
   isStaff: boolean;
+  /** Identity of the signed-in user, for the account button and drawer. */
+  fullName?: string | null;
+  email?: string | null;
+  avatarUrl?: string | null;
 }) {
   const pathname = usePathname();
   const cart = useCart();
@@ -118,8 +126,23 @@ export function SiteHeader({
                 >
                   {isSignedIn ? (
                     <>
-                      <UserIcon className="text-brand-600 size-5" />
-                      My Account
+                      <UserAvatar
+                        fullName={fullName}
+                        email={email}
+                        avatarUrl={avatarUrl}
+                        size={36}
+                      />
+                      {/* min-w-0 lets the truncation below actually apply. */}
+                      <span className="flex min-w-0 flex-col text-left">
+                        <span className="truncate leading-tight">
+                          {fullName ?? "My Account"}
+                        </span>
+                        {email && (
+                          <span className="text-muted-foreground truncate text-xs font-normal">
+                            {email}
+                          </span>
+                        )}
+                      </span>
                     </>
                   ) : (
                     <>
@@ -184,10 +207,27 @@ export function SiteHeader({
 
           <Link
             href={isSignedIn ? "/account/orders" : "/login"}
-            aria-label={isSignedIn ? "My account" : "Sign in"}
-            className="tap-target hover:bg-muted focus-visible:ring-ring hidden place-items-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none md:grid"
+            aria-label={
+              isSignedIn ? `My account — ${fullName ?? email ?? "signed in"}` : "Sign in"
+            }
+            className="tap-target hover:bg-muted focus-visible:ring-ring hidden items-center gap-2 rounded-lg px-2 transition-colors focus-visible:ring-2 focus-visible:outline-none md:flex"
           >
-            <UserIcon className="size-5" />
+            {isSignedIn ? (
+              <>
+                <UserAvatar
+                  fullName={fullName}
+                  email={email}
+                  avatarUrl={avatarUrl}
+                  size={28}
+                />
+                {/* Hidden below lg so a long name cannot crowd the nav. */}
+                <span className="hidden max-w-28 truncate text-sm font-semibold lg:inline">
+                  {fullName ?? email}
+                </span>
+              </>
+            ) : (
+              <UserIcon className="size-5" />
+            )}
           </Link>
         </div>
       </div>
