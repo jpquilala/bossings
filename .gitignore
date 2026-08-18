@@ -49,3 +49,6 @@ next-env.d.ts
 # Local product photos — uploaded to Supabase Storage, not committed.
 /product-images/*
 !/product-images/README.txt
+
+# Supabase CLI scratch files.
+supabase/.temp/
