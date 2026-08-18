@@ -1,0 +1,149 @@
+// Bossing's Flying Saucer — Prisma schema
+// Source of truth for the database. Money is stored as Int centavos.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+// Connection URLs live in prisma.config.ts (Prisma 7 moved them out of here).
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum OrderType {
+  DINE_IN
+  TAKE_OUT
+  ADVANCE_ORDER
+  DELIVERY
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  GCASH
+}
+
+/// Mirrors auth.users. `id` is the Supabase auth user id.
+model Profile {
+  id        String   @id @db.Uuid
+  fullName  String?  @map("full_name")
+  phone     String?
+  avatarUrl String?  @map("avatar_url")
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  orders Order[]
+
+  @@map("profiles")
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String    @unique
+  sortOrder Int       @default(0) @map("sort_order")
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String  @id @default(uuid()) @db.Uuid
+  categoryId  String  @map("category_id") @db.Uuid
+  name        String
+  slug        String  @unique
+  description String?
+  /// Price in centavos. P35.00 => 3500
+  basePrice   Int     @map("base_price")
+  imageUrl    String? @map("image_url")
+  isAvailable Boolean @default(true) @map("is_available")
+  sortOrder   Int     @default(0) @map("sort_order")
+
+  category Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  variants ProductVariant[]
+  items    OrderItem[]
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String  @id @default(uuid()) @db.Uuid
+  productId String  @map("product_id") @db.Uuid
+  /// e.g. "10oz", "16oz"
+  label     String
+  /// Price in centavos — absolute, not a delta.
+  price     Int
+  isDefault Boolean @default(false) @map("is_default")
+
+  product Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  items   OrderItem[]
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model Order {
+  id            String        @id @default(uuid()) @db.Uuid
+  /// Null for guest checkout.
+  userId        String?       @map("user_id") @db.Uuid
+  orderNumber   String        @unique @map("order_number")
+  orderType     OrderType     @map("order_type")
+  status        OrderStatus   @default(PENDING)
+  customerName  String        @map("customer_name")
+  phone         String
+  address       String?
+  scheduledFor  DateTime?     @map("scheduled_for")
+  paymentMethod PaymentMethod @map("payment_method")
+  notes         String?
+  subtotal      Int
+  deliveryFee   Int           @default(0) @map("delivery_fee")
+  total         Int
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  profile Profile?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items   OrderItem[]
+
+  @@index([userId])
+  @@index([status, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  orderId   String  @map("order_id") @db.Uuid
+  productId String? @map("product_id") @db.Uuid
+  variantId String? @map("variant_id") @db.Uuid
+  /// Snapshot of the product (+ variant) name at purchase time.
+  name      String
+  /// Snapshot of unit price in centavos at purchase time.
+  unitPrice Int     @map("unit_price")
+  quantity  Int
+  lineTotal Int     @map("line_total")
+
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  // Both FKs are unindexed by default; the sellers report groups by them.
+  @@index([productId])
+  @@index([variantId])
+  @@map("order_items")
+}

@@ -1,0 +1,290 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ───────────────────────────────────────────────────────────
+   BOSSING'S FLYING SAUCER — brand tokens
+   Fiery orange→red, gold/amber accents, deep navy + white
+   contrast badges, charcoal text.
+   ─────────────────────────────────────────────────────────── */
+:root {
+  /* Brand ramp — orange to red */
+  --brand-50: oklch(0.968 0.032 62);
+  --brand-100: oklch(0.934 0.062 62);
+  --brand-200: oklch(0.879 0.11 55);
+  --brand-300: oklch(0.812 0.152 48);
+  --brand-400: oklch(0.744 0.181 42);
+  --brand-500: oklch(0.681 0.202 36); /* fiery orange */
+  --brand-600: oklch(0.612 0.216 30);
+  --brand-700: oklch(0.545 0.212 27); /* deep red */
+  --brand-800: oklch(0.472 0.185 26);
+  --brand-900: oklch(0.408 0.152 26);
+
+  /* Gold / amber accents */
+  --gold-300: oklch(0.905 0.132 92);
+  --gold-400: oklch(0.855 0.158 88);
+  --gold-500: oklch(0.806 0.168 84); /* starburst badge */
+  --gold-600: oklch(0.72 0.157 78);
+
+  /* Deep navy contrast */
+  --navy-500: oklch(0.402 0.096 258);
+  --navy-700: oklch(0.302 0.086 260);
+  --navy-900: oklch(0.222 0.068 262);
+
+  /* Neutrals */
+  --charcoal: oklch(0.248 0.012 264);
+  --cream: oklch(0.985 0.008 78);
+
+  --radius: 0.875rem;
+
+  /* ── ShadCN semantic tokens (light) ── */
+  --background: var(--cream);
+  --foreground: var(--charcoal);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--charcoal);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--charcoal);
+  --primary: var(--brand-600);
+  --primary-foreground: oklch(0.995 0 0);
+  --secondary: var(--gold-500);
+  --secondary-foreground: var(--navy-900);
+  --muted: oklch(0.958 0.012 70);
+  --muted-foreground: oklch(0.508 0.022 264);
+  --accent: var(--gold-400);
+  --accent-foreground: var(--navy-900);
+  --destructive: oklch(0.577 0.221 27);
+  --destructive-foreground: oklch(0.995 0 0);
+  --border: oklch(0.902 0.014 70);
+  --input: oklch(0.902 0.014 70);
+  --ring: var(--brand-500);
+}
+
+.dark {
+  --background: oklch(0.178 0.018 264);
+  --foreground: oklch(0.968 0.008 78);
+  --card: oklch(0.222 0.022 264);
+  --card-foreground: oklch(0.968 0.008 78);
+  --popover: oklch(0.222 0.022 264);
+  --popover-foreground: oklch(0.968 0.008 78);
+  --primary: var(--brand-500);
+  --primary-foreground: oklch(0.155 0.02 264);
+  --secondary: var(--gold-500);
+  --secondary-foreground: oklch(0.155 0.02 264);
+  --muted: oklch(0.282 0.022 264);
+  --muted-foreground: oklch(0.712 0.018 264);
+  --accent: var(--gold-400);
+  --accent-foreground: oklch(0.155 0.02 264);
+  --destructive: oklch(0.652 0.212 27);
+  --destructive-foreground: oklch(0.155 0.02 264);
+  --border: oklch(0.318 0.022 264);
+  --input: oklch(0.318 0.022 264);
+  --ring: var(--brand-400);
+}
+
+/* ── Expose tokens to Tailwind utilities ── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  --color-gold-300: var(--gold-300);
+  --color-gold-400: var(--gold-400);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+
+  --color-navy-500: var(--navy-500);
+  --color-navy-700: var(--navy-700);
+  --color-navy-900: var(--navy-900);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+
+  /* Chart series. Named by role so the chart reads a token rather than a
+     hardcoded colour, which keeps dark mode correct for free. */
+  --color-chart-revenue: var(--brand-500);
+  --color-chart-orders: var(--navy-500);
+  --color-chart-grid: var(--border);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    /* Prevent horizontal scroll from the decorative sunburst layers. */
+    overflow-x: hidden;
+  }
+
+  /* Bold geometric display type for headings.
+     Poppins ships a real 800, so we no longer synthesise weight 900 — faux
+     bolding was thickening the strokes and closing up the counters. Letter
+     spacing is neutral rather than negative, which is what made "Bossing"
+     and "Pili" run together at large sizes. */
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: 0;
+    /* Keeps big headlines tight vertically without cramping them sideways. */
+    line-height: 1.1;
+  }
+
+  /* Always-visible focus ring — never hover-only affordances. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+/* ── Brand gradient surfaces ──
+   Declared with @utility, not inside @layer utilities: only @utility lets
+   Tailwind v4 generate variants such as `data-[state=active]:bg-brand-gradient`
+   (used by the active menu tab) and `hover:`. */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(
+    135deg,
+    var(--brand-500) 0%,
+    var(--brand-600) 45%,
+    var(--brand-700) 100%
+  );
+}
+
+@utility bg-gold-gradient {
+  background-image: linear-gradient(
+    135deg,
+    var(--gold-400) 0%,
+    var(--gold-500) 50%,
+    var(--gold-600) 100%
+  );
+}
+
+@layer utilities {
+  /* ── Display text with outline + drop shadow, like the logo ── */
+  .text-outline {
+    -webkit-text-stroke: 1.5px var(--navy-900);
+    paint-order: stroke fill;
+    text-shadow: 0 3px 0 rgb(0 0 0 / 0.28);
+  }
+
+  .text-shadow-pop {
+    text-shadow:
+      0 2px 0 rgb(0 0 0 / 0.22),
+      0 6px 18px rgb(0 0 0 / 0.28);
+  }
+
+  /* ── Sunburst rays behind the hero ── */
+  .sunburst {
+    background-image: repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      rgb(255 255 255 / 0.14) 0deg 7deg,
+      transparent 7deg 14deg
+    );
+  }
+
+  /* ── Gold starburst price badge ── */
+  .starburst {
+    clip-path: polygon(
+      50% 0%,
+      61% 10%,
+      76% 6%,
+      80% 21%,
+      95% 26%,
+      90% 40%,
+      100% 50%,
+      90% 60%,
+      95% 74%,
+      80% 79%,
+      76% 94%,
+      61% 90%,
+      50% 100%,
+      39% 90%,
+      24% 94%,
+      20% 79%,
+      5% 74%,
+      10% 60%,
+      0% 50%,
+      10% 40%,
+      5% 26%,
+      20% 21%,
+      24% 6%,
+      39% 10%
+    );
+  }
+
+  /* ── iOS safe-area helpers for the sticky bottom bar ── */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .mb-safe-bar {
+    /* Clears the fixed bottom bar plus the home indicator. */
+    margin-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Guarantees a 44x44px touch target regardless of content size. */
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Respect reduced-motion for the floating/steam animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes float-saucer {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+.animate-float {
+  animation: float-saucer 5s ease-in-out infinite;
+}
