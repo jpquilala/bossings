@@ -14,8 +14,19 @@ export const STORE = {
     return d.length === 11 ? `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7)}` : d;
   },
   messengerUrl: publicEnv.messengerUrl,
-  mapQuery:
-    "San Pablo City Water District, San Pablo City, Laguna, Philippines",
+  /**
+   * Exact stall coordinates, from the owner's own Google Maps pin
+   * (https://maps.app.goo.gl/eosgiZx1BqnhFTay5). Reverse-geocodes to
+   * F. Amante Drive, San Jose, San Pablo, Laguna.
+   *
+   * Coordinates rather than a text search: the previous query resolved to the
+   * Water District complex, which is a neighbouring landmark rather than the
+   * stall itself, so the pin landed in the wrong spot.
+   */
+  coordinates: { lat: 14.057721, lng: 121.341096 },
+  get mapQuery() {
+    return `${this.coordinates.lat},${this.coordinates.lng}`;
+  },
 } as const;
 
 /** Default store hours — editable from /location and persisted server-side. */

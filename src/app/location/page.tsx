@@ -15,7 +15,13 @@ export default async function LocationPage() {
   const profile = await getSessionProfile().catch(() => null);
   const canEdit = isStaff(profile?.role);
 
-  const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(STORE.mapQuery)}&output=embed`;
+  // z=17 frames the stall and its surrounding landmarks; the default zoom for a
+  // bare coordinate is wide enough to be unhelpful on a phone.
+  const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(
+    STORE.mapQuery,
+  )}&z=17&output=embed`;
+  // Directions route to the exact coordinates rather than a place name, so the
+  // pin cannot drift to a similarly-named business.
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
     STORE.mapQuery,
   )}`;
@@ -26,7 +32,7 @@ export default async function LocationPage() {
       <header className="text-center">
         <h1 className="text-3xl sm:text-4xl">Hanapin mo kami!</h1>
         <p className="text-muted-foreground mt-2 text-sm">
-          Dine in, take out, or have it delivered around San Pablo City.
+          Take out, schedule ahead, or have it delivered around San Pablo City.
         </p>
       </header>
 

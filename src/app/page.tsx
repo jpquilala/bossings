@@ -131,7 +131,7 @@ export default async function HomePage() {
             {
               icon: ClockIcon,
               title: "Tell us when",
-              body: "Dine in, take out, schedule ahead, or have it delivered.",
+              body: "Take out, schedule ahead, or have it delivered.",
             },
             {
               icon: SparklesIcon,

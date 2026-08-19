@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     template: `%s — ${STORE.name}`,
   },
   description:
-    "Freshly grilled flying saucer sandwiches. Only P35 each. Dine in, take out, advance order or delivery in San Pablo City, Laguna.",
+    "Freshly grilled flying saucer sandwiches. Only P35 each. Take out, advance order or delivery in San Pablo City, Laguna.",
   openGraph: {
     title: `${STORE.name} — ${STORE.tagline}`,
     description: "Freshly grilled flying saucer sandwiches. Only P35 each.",
