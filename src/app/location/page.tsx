@@ -32,7 +32,8 @@ export default async function LocationPage() {
       <header className="text-center">
         <h1 className="text-3xl sm:text-4xl">Hanapin mo kami!</h1>
         <p className="text-muted-foreground mt-2 text-sm">
-          Take out, schedule ahead, or have it delivered around San Pablo City.
+          Kain dito sa stall, take out, schedule ahead, or have it delivered around San
+          Pablo City.
         </p>
       </header>
 

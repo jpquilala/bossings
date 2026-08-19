@@ -36,8 +36,11 @@ export const metadata: Metadata = {
     default: `${STORE.name} — ${STORE.tagline}`,
     template: `%s — ${STORE.name}`,
   },
+  // Dine in stays in the search description on purpose: it describes how the
+  // stall serves customers, not what the checkout offers. Walk-up diners order
+  // over the counter, and dropping the term would lose that search traffic.
   description:
-    "Freshly grilled flying saucer sandwiches. Only P35 each. Take out, advance order or delivery in San Pablo City, Laguna.",
+    "Freshly grilled flying saucer sandwiches. Only P35 each. Dine in, take out, advance order or delivery in San Pablo City, Laguna.",
   openGraph: {
     title: `${STORE.name} — ${STORE.tagline}`,
     description: "Freshly grilled flying saucer sandwiches. Only P35 each.",
