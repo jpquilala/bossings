@@ -23,6 +23,7 @@ import { useCart } from "@/components/cart/cart-provider";
 import { submitOrder, type CheckoutState } from "@/server/order-actions";
 import { trackOrder } from "@/hooks/use-order-notifications";
 import { formatPeso } from "@/lib/currency";
+import { STORE } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import type { OrderType, PaymentMethod } from "@/types/order";
 
@@ -50,7 +51,13 @@ function paymentOptions(orderType: OrderType) {
   const cashLabel = orderType === "DELIVERY" ? "Cash on Delivery" : "Cash on Pickup";
   return [
     { value: "CASH" as PaymentMethod, label: cashLabel, hint: "Pay when you receive it" },
-    { value: "GCASH" as PaymentMethod, label: "GCash", hint: "We'll send the number to pay" },
+    {
+      value: "GCASH" as PaymentMethod,
+      label: "GCash",
+      // The number is shown up front rather than promised later, so the
+      // customer can pay the moment they place the order.
+      hint: `Send to ${STORE.gcashDisplay}`,
+    },
   ];
 }
 

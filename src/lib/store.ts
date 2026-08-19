@@ -14,6 +14,17 @@ export const STORE = {
     return d.length === 11 ? `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7)}` : d;
   },
   messengerUrl: publicEnv.messengerUrl,
+  facebookUrl: "https://www.facebook.com/profile.php?id=61566948203272",
+  /**
+   * GCash account number. Currently the same line as the store phone, but
+   * kept as its own field: the payment account and the contact number are
+   * separate facts, and changing one must not silently change the other.
+   */
+  gcashDigits: publicEnv.storePhone,
+  get gcashDisplay() {
+    const d = this.gcashDigits;
+    return d.length === 11 ? `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7)}` : d;
+  },
   /**
    * Exact stall coordinates, from the owner's own Google Maps pin
    * (https://maps.app.goo.gl/eosgiZx1BqnhFTay5). Reverse-geocodes to
