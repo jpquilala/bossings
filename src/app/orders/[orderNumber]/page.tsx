@@ -125,6 +125,37 @@ export default async function OrderPage({
               {order.orderType === "DELIVERY" &&
                 " — delivery fee depends on location and is confirmed before dispatch."}
             </p>
+
+            {/* Paying by GCash is the one case where the customer still has
+                something to do, so the number belongs here rather than only on
+                checkout — this is the page they keep open. */}
+            {order.paymentMethod === "GCASH" && (
+              <div className="border-gold-400 bg-gold-400/10 mt-4 rounded-xl border-2 p-4">
+                <p className="font-display text-sm">Send your GCash payment</p>
+                <dl className="mt-2 flex flex-wrap items-end gap-x-8 gap-y-2">
+                  <div>
+                    <dt className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+                      GCash number
+                    </dt>
+                    <dd className="font-display text-xl tabular-nums">
+                      {STORE.gcashDisplay}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground text-xs font-bold tracking-widest uppercase">
+                      Amount
+                    </dt>
+                    <dd className="font-display text-xl tabular-nums">
+                      {formatPeso(order.total)}
+                    </dd>
+                  </div>
+                </dl>
+                <p className="text-muted-foreground mt-3 text-xs">
+                  Use <span className="font-semibold">#{order.orderNumber}</span> as the
+                  reference, then send us the receipt. Kitchen starts once payment lands.
+                </p>
+              </div>
+            )}
           </div>
 
           <Separator />

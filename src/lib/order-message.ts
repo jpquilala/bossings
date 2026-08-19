@@ -47,6 +47,13 @@ export function buildOrderMessage(input: MessageInput): string {
 
   if (input.notes) lines.push(`Notes: ${input.notes}`);
 
+  // Restate the GCash details in the message itself: the customer often sends
+  // this from their phone and then switches straight to the GCash app, so the
+  // number needs to travel with the order rather than stay on the web page.
+  if (input.paymentMethod === "GCASH") {
+    lines.push("", `GCash: ${STORE.gcashDisplay} (${formatPeso(input.total)})`);
+  }
+
   return lines.join("\n");
 }
 
