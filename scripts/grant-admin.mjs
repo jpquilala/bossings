@@ -1,7 +1,8 @@
 /**
- * Promotes an existing Supabase auth user to ADMIN.
+ * Grants an existing Supabase auth user a staff role.
  *
- *   node scripts/grant-admin.mjs juanpaulo.quilala@gmail.com
+ *   node scripts/grant-admin.mjs someone@example.com          # ADMIN
+ *   node scripts/grant-admin.mjs someone@example.com STAFF
  *
  * Create the user first (Supabase dashboard -> Authentication -> Add user),
  * so no password ever passes through this script or the shell history.
@@ -18,8 +19,17 @@ import { PrismaClient } from "../src/generated/prisma/client.js";
 config({ path: ".env.local", quiet: true });
 
 const email = process.argv[2];
+// Only the two staff roles are grantable here. CUSTOMER is the signup default,
+// and demoting is a different, riskier operation that should be deliberate.
+const ROLES = ["ADMIN", "STAFF"];
+const role = (process.argv[3] ?? "ADMIN").toUpperCase();
+
 if (!email) {
-  console.error("Usage: node scripts/grant-admin.mjs <email>");
+  console.error("Usage: node scripts/grant-admin.mjs <email> [ADMIN|STAFF]");
+  process.exit(1);
+}
+if (!ROLES.includes(role)) {
+  console.error(`Unknown role "${role}". Expected one of: ${ROLES.join(", ")}`);
   process.exit(1);
 }
 
@@ -63,11 +73,11 @@ const prisma = new PrismaClient({
 // the user was created before the trigger existed.
 const profile = await prisma.profile.upsert({
   where: { id: user.id },
-  update: { role: "ADMIN" },
+  update: { role },
   create: {
     id: user.id,
-    fullName: user.user_metadata?.full_name ?? "Bossing Admin",
-    role: "ADMIN",
+    fullName: user.user_metadata?.full_name ?? null,
+    role,
   },
   select: { id: true, fullName: true, role: true },
 });
@@ -76,5 +86,6 @@ console.log(`${email} is now ${profile.role}`);
 console.log(`  profile id: ${profile.id}`);
 console.log(`  name:       ${profile.fullName ?? "(none)"}`);
 console.log("\nSign in at /login -> \"Staff sign in\", then open /admin.");
+console.log("Both ADMIN and STAFF reach /admin: isStaff() accepts either.");
 
 await prisma.$disconnect();
