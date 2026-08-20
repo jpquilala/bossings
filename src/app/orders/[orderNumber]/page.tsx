@@ -13,9 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { OrderTracker } from "@/components/checkout/order-tracker";
-import { SendOrderButtons } from "@/components/checkout/send-order-buttons";
 import { getOrderByNumber } from "@/server/orders";
-import { buildOrderMessage } from "@/lib/order-message";
 import { formatPeso } from "@/lib/currency";
 import { ORDER_TYPE_LABEL, PAYMENT_METHOD_LABEL } from "@/types/order";
 import { STORE } from "@/lib/store";
@@ -43,19 +41,6 @@ export default async function OrderPage({
   // their order vanished. Let it surface to the error boundary instead.
   const order = await getOrderByNumber(orderNumber);
   if (!order) notFound();
-
-  const message = buildOrderMessage({
-    orderNumber: order.orderNumber,
-    customerName: order.customerName,
-    phone: order.phone,
-    orderType: order.orderType,
-    paymentMethod: order.paymentMethod,
-    address: order.address,
-    scheduledFor: order.scheduledFor,
-    notes: order.notes,
-    items: order.items,
-    total: order.total,
-  });
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -214,12 +199,22 @@ export default async function OrderPage({
 
           <Separator />
 
+          {/* The SMS/Messenger hand-off was removed: the order already reaches
+              the kitchen queue on its own, so asking the customer to send it
+              again implied the order was not really placed. The number stays
+              for genuine problems. */}
           <div>
-            <h2 className="font-display text-base">Send your order</h2>
+            <h2 className="font-display text-base">Need help with this order?</h2>
             <p className="text-muted-foreground mt-1 mb-3 text-sm">
-              We confirm fastest over SMS or Messenger.
+              We&apos;ve got it — no need to send anything. Call us if something
+              looks wrong.
             </p>
-            <SendOrderButtons message={message} />
+            <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
+              <a href={`tel:+63${STORE.phoneDigits.slice(1)}`}>
+                <PhoneIcon className="size-4" />
+                {STORE.phoneDisplay}
+              </a>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -235,12 +230,6 @@ export default async function OrderPage({
         </Button>
         <Button asChild variant="outline">
           <Link href="/menu">Order again</Link>
-        </Button>
-        <Button asChild variant="ghost">
-          <a href={`tel:+63${STORE.phoneDigits.slice(1)}`}>
-            <PhoneIcon className="size-4" />
-            Call the stall
-          </a>
         </Button>
       </div>
 
