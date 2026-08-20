@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
  * Mounts the realtime subscription and shows its state. Staff need to know at
  * a glance whether the queue they are looking at is actually live.
  */
-export function LiveIndicator() {
+export function LiveIndicator({ activeCount }: { activeCount?: number } = {}) {
   // Starts false so the server HTML and the first client render agree; the
   // saved preference is adopted immediately after mount via useSyncExternal-
   // Store, which is the hydration-safe way to read a browser-only value.
@@ -38,16 +38,23 @@ export function LiveIndicator() {
   React.useEffect(() => {
     if (!savedPreference) return;
 
-    // Re-arm on the first interaction of the new page. Any real gesture
-    // satisfies the autoplay policy, so this usually happens well before the
-    // first order lands; playChime() also self-heals if it does not.
+    // Re-arm continuously rather than once. The AudioContext is a module-level
+    // singleton that Chrome suspends whenever this tab is backgrounded -- and
+    // the kitchen screen is usually not the focused tab. A one-shot listener
+    // would arm it at mount and never again, so sound worked until the first
+    // time someone looked away.
     const rearm = () => void unlockChime();
-    const opts = { once: true, passive: true } as const;
+    const opts = { passive: true } as const;
     window.addEventListener("pointerdown", rearm, opts);
     window.addEventListener("keydown", rearm, opts);
+    // Returning to the tab is itself the moment to restore audio.
+    document.addEventListener("visibilitychange", rearm);
+    window.addEventListener("focus", rearm);
     return () => {
       window.removeEventListener("pointerdown", rearm);
       window.removeEventListener("keydown", rearm);
+      document.removeEventListener("visibilitychange", rearm);
+      window.removeEventListener("focus", rearm);
     };
   }, [savedPreference]);
 
@@ -56,6 +63,19 @@ export function LiveIndicator() {
   }, [soundOn]);
 
   const { status } = useLiveOrders({ onNewOrder: handleNewOrder });
+
+  // Safety net for polling mode. The realtime handler cannot fire when the
+  // socket is down, so a growing order count is the only signal available.
+  // Compared during render (not in an effect) so the very first paint after a
+  // poll already has the correct baseline.
+  const [lastCount, setLastCount] = React.useState(activeCount);
+  if (activeCount !== undefined && activeCount !== lastCount) {
+    const grew = lastCount !== undefined && activeCount > lastCount;
+    setLastCount(activeCount);
+    // Only in polling mode: in realtime mode the INSERT handler already
+    // chimed, and doing both would double up.
+    if (grew && soundOn && status !== "live") playChime();
+  }
 
   const label =
     status === "live"

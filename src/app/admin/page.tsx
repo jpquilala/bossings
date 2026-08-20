@@ -68,7 +68,7 @@ export default async function AdminPage({
         <div>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-3xl">Kitchen queue</h1>
-            <LiveIndicator />
+            <LiveIndicator activeCount={activeCount} />
           </div>
           <p className="text-muted-foreground mt-1 text-sm">
             Today&rsquo;s orders &middot; {dayLabel}

@@ -83,10 +83,18 @@ export function playChime() {
   if (!ctx) return;
 
   if (ctx.state === "suspended") {
-    // Fire-and-forget: if the gesture requirement is satisfied this resolves
-    // and the *next* chime is audible. Waiting here would delay the tone past
-    // the moment it is useful.
-    void ctx.resume().then(() => emit(ctx));
+    // Chrome suspends an AudioContext when its tab is backgrounded, and the
+    // kitchen screen is very often not the focused tab. Resume and play on
+    // success rather than giving up -- once the page has seen any gesture the
+    // resume is permitted even while unfocused, so the chime still lands.
+    void ctx
+      .resume()
+      .then(() => {
+        if (ctx.state === "running") emit(ctx);
+      })
+      .catch(() => {
+        // Still blocked; the toggle's own listener will re-arm on next input.
+      });
     return;
   }
   if (ctx.state !== "running") return;
