@@ -18,7 +18,7 @@ export type LiveStatus = "connecting" | "live" | "polling";
  * rather than silently showing a stale queue — a missed order is worse than a
  * few extra requests.
  */
-export function useLiveOrders() {
+export function useLiveOrders({ onNewOrder }: { onNewOrder?: () => void } = {}) {
   const router = useRouter();
   const [status, setStatus] = React.useState<LiveStatus>("connecting");
   const [lastEventAt, setLastEventAt] = React.useState<number | null>(null);
@@ -34,6 +34,13 @@ export function useLiveOrders() {
   React.useEffect(() => {
     refreshRef.current = refresh;
   }, [refresh]);
+
+  // Same reasoning as refreshRef: a caller passing an inline arrow must not
+  // tear down and rebuild the realtime channel on every render.
+  const onNewOrderRef = React.useRef(onNewOrder);
+  React.useEffect(() => {
+    onNewOrderRef.current = onNewOrder;
+  }, [onNewOrder]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -83,9 +90,15 @@ export function useLiveOrders() {
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "orders" },
-          () => {
+          (payload) => {
             if (cancelled) return;
             setLastEventAt(Date.now());
+            // Only an INSERT is a new order. Without this check the alert
+            // would also fire every time a staff member advanced a status,
+            // which is five times per order and trains people to ignore it.
+            if (payload.eventType === "INSERT") {
+              onNewOrderRef.current?.();
+            }
             refreshRef.current();
           },
         )
