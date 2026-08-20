@@ -47,12 +47,19 @@ const MY_ORDERS_LINK: NavLink = {
   icon: ClipboardListIcon,
 };
 
-function navLinks(isSignedIn: boolean): NavLink[] {
+const ADMIN_LINK: NavLink = { href: "/admin", label: "Admin", icon: ShieldCheckIcon };
+
+function navLinks(isSignedIn: boolean, isStaff: boolean): NavLink[] {
   // /account/orders is behind the auth guard, so showing it to a guest would
   // just bounce them to /login. Guests get order tracking instead.
-  return isSignedIn
+  const links = isSignedIn
     ? [...BASE_NAV_LINKS, TRACK_LINK, MY_ORDERS_LINK]
     : [...BASE_NAV_LINKS, TRACK_LINK];
+
+  // Staff reach the kitchen queue from every viewport, not just the mobile
+  // drawer. Last in the list so it reads as a separate tool rather than
+  // another customer-facing page.
+  return isStaff ? [...links, ADMIN_LINK] : links;
 }
 
 export function SiteHeader({
@@ -71,7 +78,7 @@ export function SiteHeader({
 }) {
   const pathname = usePathname();
   const cart = useCart();
-  const links = navLinks(isSignedIn);
+  const links = navLinks(isSignedIn, isStaff);
   // The drawer closes itself: every link inside is wrapped in <SheetClose>,
   // so no route-change effect is needed.
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -83,7 +90,7 @@ export function SiteHeader({
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger
             aria-label="Open menu"
-            className="tap-target hover:bg-muted focus-visible:ring-ring grid shrink-0 place-items-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none md:hidden"
+            className="tap-target hover:bg-muted focus-visible:ring-ring grid shrink-0 place-items-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:outline-none lg:hidden"
           >
             <MenuIcon className="size-6" />
           </SheetTrigger>
@@ -108,18 +115,6 @@ export function SiteHeader({
                   </Link>
                 </SheetClose>
               ))}
-
-              {isStaff && (
-                <SheetClose asChild>
-                  <Link
-                    href="/admin"
-                    className="hover:bg-muted focus-visible:ring-ring flex min-h-12 items-center gap-3 rounded-lg px-3 font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    <ShieldCheckIcon className="text-brand-600 size-5" />
-                    Admin
-                  </Link>
-                </SheetClose>
-              )}
 
               <SheetClose asChild>
                 <Link
@@ -175,7 +170,7 @@ export function SiteHeader({
         </Sheet>
 
         {/* Desktop horizontal nav */}
-        <nav aria-label="Main" className="hidden shrink-0 items-center gap-1 md:flex">
+        <nav aria-label="Main" className="hidden shrink-0 items-center gap-1 lg:flex">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -194,7 +189,7 @@ export function SiteHeader({
         <Link
           href="/"
           aria-label="Bossing's Flying Saucer — home"
-          className="focus-visible:ring-ring mx-auto flex items-center rounded-lg focus-visible:ring-2 focus-visible:outline-none md:mx-0 md:ml-4"
+          className="focus-visible:ring-ring mx-auto flex items-center rounded-lg focus-visible:ring-2 focus-visible:outline-none lg:mx-0 lg:ml-4"
         >
           <Logo priority />
         </Link>
