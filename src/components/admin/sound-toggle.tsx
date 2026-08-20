@@ -6,6 +6,7 @@ import { playChime, unlockChime } from "@/lib/chime";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "bfs:queue-sound";
+const CHANGE_EVENT = "bfs:queue-sound-change";
 
 /** Reads the saved preference. Defaults to on — staff opted in by tapping. */
 function readPreference(): boolean {
@@ -25,7 +26,10 @@ function readPreference(): boolean {
  * would leave staff with no way to tell whether the alert is actually armed,
  * and no way to mute it during a quiet period.
  */
-export function SoundToggle({ enabled, onChange }: {
+export function SoundToggle({
+  enabled,
+  onChange,
+}: {
   enabled: boolean;
   onChange: (next: boolean) => void;
 }) {
@@ -55,7 +59,9 @@ export function SoundToggle({ enabled, onChange }: {
         type="button"
         onClick={toggle}
         aria-pressed={enabled}
-        aria-label={enabled ? "Turn off new order sound" : "Turn on new order sound"}
+        aria-label={
+          enabled ? "Turn off new order sound" : "Turn on new order sound"
+        }
         className={cn(
           "tap-target focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-lg border-2 px-3 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none",
           enabled
@@ -72,7 +78,10 @@ export function SoundToggle({ enabled, onChange }: {
       </button>
 
       {blocked && (
-        <p role="alert" className="text-destructive max-w-48 text-right text-xs">
+        <p
+          role="alert"
+          className="text-destructive max-w-48 text-right text-xs"
+        >
           Your browser blocked audio. Check the site&rsquo;s sound permissions.
         </p>
       )}
@@ -86,6 +95,21 @@ function persist(on: boolean) {
   } catch {
     // Private mode — the toggle still works for this session.
   }
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+/**
+ * Notifies subscribers when the preference changes, including from another
+ * tab. `storage` only fires cross-tab, so writes in this tab dispatch their
+ * own event.
+ */
+export function subscribeToPreference(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(CHANGE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(CHANGE_EVENT, onChange);
+  };
 }
 
 export { STORAGE_KEY as SOUND_STORAGE_KEY, readPreference };

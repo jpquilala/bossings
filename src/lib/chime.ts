@@ -65,14 +65,35 @@ function tone(ctx: AudioContext, freq: number, startAt: number, duration: number
   osc.stop(startAt + duration + 0.02);
 }
 
+/** True when audio is unlocked and a chime would actually be heard. */
+export function isChimeReady(): boolean {
+  return context?.state === "running";
+}
+
 /**
- * Plays the rising two-note chime. Safe to call when audio is unavailable or
- * still locked — it simply does nothing.
+ * Plays the rising two-note chime.
+ *
+ * If the context is suspended — which happens on every fresh page load, even
+ * when the user previously enabled sound — this attempts a resume first. That
+ * succeeds when the page has already seen any user gesture, so in practice a
+ * reload recovers as soon as staff touch the page at all.
  */
 export function playChime() {
   const ctx = getContext();
-  if (!ctx || ctx.state !== "running") return;
+  if (!ctx) return;
 
+  if (ctx.state === "suspended") {
+    // Fire-and-forget: if the gesture requirement is satisfied this resolves
+    // and the *next* chime is audible. Waiting here would delay the tone past
+    // the moment it is useful.
+    void ctx.resume().then(() => emit(ctx));
+    return;
+  }
+  if (ctx.state !== "running") return;
+  emit(ctx);
+}
+
+function emit(ctx: AudioContext) {
   const now = ctx.currentTime;
   // A perfect fourth (A5 -> D6) reads as "attention" rather than "error".
   tone(ctx, 880, now, 0.18);

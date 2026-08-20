@@ -3,7 +3,11 @@
 import * as React from "react";
 import { RefreshCwIcon } from "lucide-react";
 import { useLiveOrders } from "@/hooks/use-live-orders";
-import { SoundToggle, readPreference } from "@/components/admin/sound-toggle";
+import {
+  SoundToggle,
+  readPreference,
+  subscribeToPreference,
+} from "@/components/admin/sound-toggle";
 import { playChime, unlockChime } from "@/lib/chime";
 import { cn } from "@/lib/utils";
 
@@ -12,23 +16,40 @@ import { cn } from "@/lib/utils";
  * a glance whether the queue they are looking at is actually live.
  */
 export function LiveIndicator() {
-  // Read localStorage lazily: touching it during render on the server would
-  // break hydration, and a lazy initialiser runs only on the client.
-  const [soundOn, setSoundOn] = React.useState(false);
+  // Starts false so the server HTML and the first client render agree; the
+  // saved preference is adopted immediately after mount via useSyncExternal-
+  // Store, which is the hydration-safe way to read a browser-only value.
+  const savedPreference = React.useSyncExternalStore(
+    subscribeToPreference,
+    readPreference,
+    () => false,
+  );
+  const [override, setOverride] = React.useState<boolean | null>(null);
+  const soundOn = override ?? savedPreference;
+  const setSoundOn = setOverride;
 
-  // The saved preference is applied after mount so the server and first client
-  // render agree. Re-unlocking is required anyway -- a fresh page load starts
-  // with a suspended AudioContext regardless of what was saved.
+  // Restore the saved preference after mount, so the server and first client
+  // render agree.
+  //
+  // The toggle reflects what the user chose, NOT whether the AudioContext is
+  // currently running. Every page load starts it suspended, and resuming
+  // outside a user gesture fails -- so gating the toggle on unlockChime() made
+  // a reload silently flip a staff member's "Sound on" back to off.
   React.useEffect(() => {
-    if (!readPreference()) return;
-    let cancelled = false;
-    void unlockChime().then((ok) => {
-      if (!cancelled && ok) setSoundOn(true);
-    });
+    if (!savedPreference) return;
+
+    // Re-arm on the first interaction of the new page. Any real gesture
+    // satisfies the autoplay policy, so this usually happens well before the
+    // first order lands; playChime() also self-heals if it does not.
+    const rearm = () => void unlockChime();
+    const opts = { once: true, passive: true } as const;
+    window.addEventListener("pointerdown", rearm, opts);
+    window.addEventListener("keydown", rearm, opts);
     return () => {
-      cancelled = true;
+      window.removeEventListener("pointerdown", rearm);
+      window.removeEventListener("keydown", rearm);
     };
-  }, []);
+  }, [savedPreference]);
 
   const handleNewOrder = React.useCallback(() => {
     if (soundOn) playChime();
