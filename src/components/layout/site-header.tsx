@@ -7,6 +7,7 @@ import {
   ClipboardListIcon,
   CupSodaIcon,
   LogInIcon,
+  LogOutIcon,
   MapPinIcon,
   MenuIcon,
   SandwichIcon,
@@ -27,6 +28,7 @@ import { Logo } from "@/components/brand/logo";
 import { NotificationBell } from "@/components/layout/notification-bell";
 import { useCart } from "@/components/cart/cart-provider";
 import { UserAvatar } from "@/components/auth/user-avatar";
+import { signOut } from "@/server/auth-actions";
 import { cn } from "@/lib/utils";
 
 type NavLink = { href: string; label: string; icon: React.ElementType };
@@ -152,6 +154,22 @@ export function SiteHeader({
                   )}
                 </Link>
               </SheetClose>
+
+              {/* Sign out lives here because the drawer is the only account
+                  surface on mobile: the header's account button is md:flex, so
+                  below 768px a signed-in user had no way out except navigating
+                  to /account/orders, which staff never visit. */}
+              {isSignedIn && (
+                <form action={signOut}>
+                  <button
+                    type="submit"
+                    className="hover:bg-muted focus-visible:ring-ring text-muted-foreground flex min-h-12 w-full items-center gap-3 rounded-lg px-3 font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    <LogOutIcon className="size-5" />
+                    Sign Out
+                  </button>
+                </form>
+              )}
             </nav>
           </SheetContent>
         </Sheet>
@@ -210,7 +228,10 @@ export function SiteHeader({
             aria-label={
               isSignedIn ? `My account — ${fullName ?? email ?? "signed in"}` : "Sign in"
             }
-            className="tap-target hover:bg-muted focus-visible:ring-ring hidden items-center gap-2 rounded-lg px-2 transition-colors focus-visible:ring-2 focus-visible:outline-none md:flex"
+            /* Visible on mobile too: a signed-in user needs to see their own
+               account without opening the drawer. Only the name is held back
+               until lg, so the narrow header stays uncluttered. */
+            className="tap-target hover:bg-muted focus-visible:ring-ring flex items-center gap-2 rounded-lg px-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             {isSignedIn ? (
               <>
